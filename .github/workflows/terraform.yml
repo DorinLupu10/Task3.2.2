@@ -4,16 +4,19 @@ on:
   pull_request:
     branches:
       - dev
+    paths:
+      - "**/*.tf"
+      - ".github/workflows/**"
 
 jobs:
   terraform:
-    name: Terraform fmt validate lint plan
+    name: Terraform plan lint validate
     runs-on: ubuntu-latest
 
     permissions:
+      id-token: write
       contents: read
       pull-requests: read
-      id-token: write
 
     env:
       AWS_REGION: eu-north-1
@@ -25,7 +28,7 @@ jobs:
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::<AWS_ACCOUNT_ID>:role/<ROLE_NAME>
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
@@ -45,10 +48,11 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
+      - name: TFLint init
+        run: tflint --init
+
       - name: TFLint
-        run: |
-          tflint --init
-          tflint --recursive
+        run: tflint --recursive
 
       - name: Terraform plan
         run: terraform plan -no-color
