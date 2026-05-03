@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - dev
+      - feature/task3.2.2
     paths:
       - "**/*.tf"
       - ".github/workflows/**"
