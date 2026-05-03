@@ -8,6 +8,16 @@ on:
       - "**/*.tf"
       - ".github/workflows/**"
 
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+
 jobs:
   terraform:
     name: Terraform plan lint validate
@@ -56,3 +66,11 @@ jobs:
 
       - name: Terraform plan
         run: terraform plan -no-color
+
+      - name: Terraform apply
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve
+
+      - name: Terraform destroy
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
